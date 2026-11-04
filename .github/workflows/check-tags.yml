@@ -35,7 +35,7 @@ jobs:
       - name: Fetch upstream
         run: |
           git remote add upstream "$UPSTREAM_URL" 2>/dev/null || git remote set-url upstream "$UPSTREAM_URL"
-          git fetch upstream --tags --force
+          git fetch upstream --tags
 
       - name: Check for new tag
         id: tag
