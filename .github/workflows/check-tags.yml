@@ -70,7 +70,7 @@ jobs:
             git push origin "$branch"
           fi
 
-          existing=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --base production --state open --json number --jq '.[0].number')
+          existing=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --base $PROD_BRANCH --state open --json number --jq '.[0].number')
 
           if [ -n "$existing" ]; then
             echo "PR #$existing already open for $branch, nothing to do."
@@ -79,7 +79,7 @@ jobs:
 
           gh pr create \
             --repo "$GITHUB_REPOSITORY" \
-            --base production \
+            --base $PROD_BRANCH \
             --head "$branch" \
             --title "Mise à jour de $CURRENT vers $LATEST" \
             --body "Nouveau tag upstream détecté.
