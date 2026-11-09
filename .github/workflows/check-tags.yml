@@ -67,7 +67,7 @@ jobs:
             echo "Branch $branch already exists, skipping branch creation"
           else
             git switch -c "$branch" "$LATEST"
-            git push origin "$branch"
+            git push origin "$branch" --tags
           fi
 
           existing=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --base $PROD_BRANCH --state open --json number --jq '.[0].number')
