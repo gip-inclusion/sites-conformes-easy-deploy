@@ -43,6 +43,15 @@ HOST_URL = os.getenv("HOST_URL", "localhost")
 HOST_PORT = os.getenv("HOST_PORT", "")
 FORCE_SCRIPT_NAME = os.getenv("FORCE_SCRIPT_NAME", "").rstrip("/")
 
+# TLS is terminated by the hosting proxy (e.g. Scalingo): trust the public origins
+# so that Django's CSRF origin check accepts HTTPS form posts (admin login, etc.).
+CSRF_TRUSTED_ORIGINS = [
+    f"{HOST_PROTO}://{host}" + (f":{HOST_PORT}" if HOST_PORT else "")
+    for host in ALLOWED_HOSTS
+    if host not in ("127.0.0.1", "localhost", ".localhost")
+]
+CSRF_TRUSTED_ORIGINS += list(filter(None, os.getenv("CSRF_TRUSTED_ORIGINS", "").replace(" ", "").split(",")))
+
 # Settings read by the sites_conformes package
 SF_USE_DB_STORAGE = False
 SF_NOINDEX = getenv_bool("SF_NOINDEX", False)
