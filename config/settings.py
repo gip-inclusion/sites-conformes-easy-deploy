@@ -258,7 +258,9 @@ HONEYPOT_ENABLED_DEFAULT = True
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
 # Admin dashboard notifications and new-version check
-NOTIFICATIONS_FILE_URL = "https://raw.githubusercontent.com/numerique-gouv/sites-conformes/refs/heads/main/notifications.json"
+NOTIFICATIONS_FILE_URL = (
+    "https://raw.githubusercontent.com/numerique-gouv/sites-conformes/refs/heads/main/notifications.json"
+)
 LATEST_RELEASE_URL = "https://api.github.com/repos/numerique-gouv/sites-conformes/releases/latest"
 RELEASES_URL = "https://github.com/numerique-gouv/sites-conformes/releases"
 ADVERTISE_LATEST_VERSION = True

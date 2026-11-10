@@ -25,6 +25,17 @@ uv run python manage.py createsuperuser
 uv run python manage.py runserver  # http://localhost:8000, admin sur /cms-admin/
 ```
 
+## Tests et qualité
+
+```sh
+make venv     # uv sync, avec les outils de dev (ruff)
+make lint     # ruff check + ruff format --check
+make format   # corrige et formate le code
+make test     # pytest (base PostgreSQL de DATABASE_URL, par exemple via .env)
+              # la base de test est réutilisée : make test ARGS=--create-db pour la recréer
+make check    # lint + tests
+```
+
 ## Déploiement sur Scalingo
 
 Le dépôt contient les fichiers attendus par Scalingo : `.buildpacks` (apt +
