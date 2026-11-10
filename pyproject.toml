@@ -1,0 +1,9 @@
+[project]
+name = "sites-conformes-easy-deploy"
+version = "0.1.0"
+description = "Projet Django minimal pour déployer une instance de Sites Conformes"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "sites-conformes>=4.3.1",
+]
