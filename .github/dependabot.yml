@@ -1,0 +1,27 @@
+version: 2
+
+updates:
+  # Python dependencies (pyproject.toml / uv.lock), mainly sites-conformes itself
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    # Same cooldown as [tool.uv] exclude-newer in pyproject.toml
+    cooldown:
+      default-days: 7
+    groups:
+      python-dependencies:
+        patterns: ["*"]
+        exclude-patterns: ["sites-conformes"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
