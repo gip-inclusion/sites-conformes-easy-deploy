@@ -16,6 +16,32 @@ uv run python manage.py createsuperuser
 uv run python manage.py runserver  # http://localhost:8000, admin sur /cms-admin/
 ```
 
+## Personnalisation
+
+On peut renseigner la variable d’environnement `SERVICE_NAME`, qui vaut
+`data-inclusion`, `mon-recap` ou `site-institutionnel` (liste définie
+dans `config/settings.py`).
+
+### Favicons
+
+Si le dossier `statics/favicons/<SERVICE_NAME>/` existe, ses fichiers remplacent ceux du
+DSFR ; sinon, ou sans `SERVICE_NAME`, c’est le favicon du DSFR. Les fichiers
+statiques étant collectés au build, changer `SERVICE_NAME` nécessite un
+redéploiement (un simple redémarrage ne suffit pas).
+
+Chaque dossier contient tout ou partie de ces fichiers (les fichiers absents
+restent ceux du DSFR). Pour ajouter un service, l’ajouter à
+`SERVICE_NAME_CHOICES` et créer son dossier dans `favicons/`.
+
+| Fichier                      | Format                     |
+| ---------------------------- | -------------------------- |
+| `favicon.svg`                | SVG                        |
+| `favicon.ico`                | ICO 32×32                  |
+| `apple-touch-icon.png`       | PNG 180×180                |
+| `android-chrome-192x192.png` | PNG 192×192                |
+| `android-chrome-512x512.png` | PNG 512×512                |
+| `manifest.webmanifest`       | à fournir seulement pour changer la liste des icônes Android |
+
 ## Tests et qualité
 
 ```sh

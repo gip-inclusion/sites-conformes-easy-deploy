@@ -83,6 +83,9 @@
     "SF_NOINDEX": {
       "description": "Demander aux moteurs de recherche de ne pas indexer le site (utile pendant la rédaction)",
       "value": "True"
+    },
+    "SERVICE_NAME": {
+      "description": "Service déployé : data-inclusion, mon-recap ou site-institutionnel (choisit notamment le favicon)."
     }
   },
   "formation": {

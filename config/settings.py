@@ -11,6 +11,7 @@ from pathlib import Path
 
 import dj_database_url
 import sites_conformes
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -195,6 +196,21 @@ LOCALE_PATHS = [PACKAGE_DIR / "locale"]
 STATIC_URL = "static/"
 STATIC_ROOT = PROJECT_DIR / "staticfiles"
 STATICFILES_DIRS = [PACKAGE_DIR / "static"]
+
+# Service deployed by this instance. Its favicons/<SERVICE_NAME>/ folder, if any, is
+# served in place of the DSFR favicon files with the same name; missing files fall
+# back to the DSFR ones. Static files are collected at build time, so changing it
+# requires a redeploy.
+SERVICE_NAME_CHOICES = ["data-inclusion", "mon-recap", "site-institutionnel"]
+SERVICE_NAME = os.getenv("SERVICE_NAME", "")
+if SERVICE_NAME and SERVICE_NAME not in SERVICE_NAME_CHOICES:
+    raise ImproperlyConfigured(
+        f"Unknown SERVICE_NAME {SERVICE_NAME!r}, expected one of: {', '.join(SERVICE_NAME_CHOICES)}"
+    )
+
+FAVICONS_DIR = PROJECT_DIR / "statics" / "favicons"
+if SERVICE_NAME and (FAVICONS_DIR / SERVICE_NAME).is_dir():
+    STATICFILES_DIRS.insert(0, ("dsfr/dist/favicon", FAVICONS_DIR / SERVICE_NAME))
 STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
