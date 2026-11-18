@@ -1,0 +1,93 @@
+name: Apply approved update
+
+# Run manually once an update PR has been approved.
+on:
+  workflow_dispatch:
+
+env:
+  PROD_BRANCH: production
+
+concurrency:
+  group: apply-update
+  cancel-in-progress: false
+
+jobs:
+  apply-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write         # push the production branch
+      pull-requests: write    # comment on the PR
+
+    steps:
+      - name: Create token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510  # v3.3.0
+        with:
+          client-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Find approved update PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          # Open update/* PRs against production with at least one approval.
+          # Keep the most recent version if several are approved.
+          pr=$(gh pr list --repo "$GITHUB_REPOSITORY" --base "$PROD_BRANCH" --state open \
+                 --json number,headRefName,headRefOid,latestReviews \
+                 --jq '.[]
+                   | select(.headRefName | startswith("update/"))
+                   | select(any(.latestReviews[]; .state == "APPROVED"))
+                   | "\(.headRefName) \(.number) \(.headRefOid)"' \
+               | sort -V -r | head -n 1)
+
+          if [ -z "$pr" ]; then
+            echo "No approved update PR."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          read -r branch number sha <<< "$pr"
+          echo "Approved update PR #$number ($branch @ $sha)"
+          {
+            echo "found=true"
+            echo "branch=$branch"
+            echo "number=$number"
+            echo "sha=$sha"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        if: steps.pr.outputs.found == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          ref: ${{ env.PROD_BRANCH }}
+
+      - name: Fast-forward production to the update
+        if: steps.pr.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: ${{ steps.pr.outputs.branch }}
+          NUMBER: ${{ steps.pr.outputs.number }}
+          SHA: ${{ steps.pr.outputs.sha }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+          git fetch origin "$BRANCH"
+
+          # Fast-forward only, so production points at the PR head commit itself
+          # (the upstream tag is kept).
+          if ! git merge-base --is-ancestor HEAD "$SHA"; then
+            gh pr comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body "⚠️ Impossible d'avancer \`$PROD_BRANCH\` en fast-forward sur \`$BRANCH\` ($SHA) : \`$PROD_BRANCH\` contient des commits absents de la PR. Résolution manuelle nécessaire.
+
+            $run_url"
+            exit 1
+          fi
+
+          # Plain push: rejected by GitHub if production moved in the meantime
+          git push origin "$SHA:refs/heads/$PROD_BRANCH"
+
+          gh pr comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body "✅ \`$PROD_BRANCH\` a été avancée en fast-forward sur \`$BRANCH\` ($SHA).
+
+          $run_url"
