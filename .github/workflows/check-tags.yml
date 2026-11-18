@@ -87,4 +87,9 @@ jobs:
 
           PR générée automatiquement par $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
           
-          Voir les nouveautés : https://github.com/numerique-gouv/sites-conformes/releases"
+          Voir les nouveautés : https://github.com/numerique-gouv/sites-conformes/releases
+          
+          ## Procédure pour Supportix
+          - approuver la PR
+          - lancer l'action apply-update $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/workflows/apply-update.yml
+          "
